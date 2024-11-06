@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import ComponentLibrary from './components/ComponentLibrary';
 
 function App() {
   const [voltage, setVoltage] = useState('');
@@ -30,25 +31,28 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>Simple Circuit Simulator</h1>
-      <p>Welcome to the Circuit Simulator!</p>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Voltage (V):
-          <input type="number" value={voltage} onChange={(e) => setVoltage(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Resistance (Ω):
-          <input type="number" value={resistance} onChange={(e) => setResistance(e.target.value)} />
-        </label>
-        <br />
-        <button type="submit">Calculate Current</button>
-      </form>
+    <div className="App" style={{ display: 'flex', gap: '20px' }}>
+      <div>
+        <h1>Simple Circuit Simulator</h1>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Voltage (V):
+            <input type="number" value={voltage} onChange={(e) => setVoltage(e.target.value)} />
+          </label>
+          <br />
+          <label>
+            Resistance (Ω):
+            <input type="number" value={resistance} onChange={(e) => setResistance(e.target.value)} />
+          </label>
+          <br />
+          <button type="submit">Calculate Current</button>
+        </form>
 
-      {current !== null && <p>Current: {current} A</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+        {current !== null && <p>Current: {current} A</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
+
+      <ComponentLibrary />
     </div>
   );
 }
