@@ -3,6 +3,7 @@ import './App.css';
 import ComponentLibrary from './components/ComponentLibrary';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import Grid from './components/Grid';
 
 function App() {
   const [voltage, setVoltage] = useState('');
@@ -58,6 +59,8 @@ function App() {
 
           <ComponentLibrary />
         </div>
+
+        <Grid />
       </div>
     </DndProvider>
   );
