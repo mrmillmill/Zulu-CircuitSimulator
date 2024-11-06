@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 
 const Grid = () => {
   // State to track dropped components in each cell
   const [cells, setCells] = useState(Array(25).fill(null));
+
+  const gridRef = useRef(null);
 
   // Define the drop behavior
   const [{ isOver }, drop] = useDrop(() => ({
@@ -13,8 +15,8 @@ const Grid = () => {
 
       if (clientOffset) {
         // Calculate which cell was dropped on
-        const cellIndex = calculateCellIndex(clientOffset);
-        updateCell(cellIndex, item.name);
+        const cellIndex = calculateCellIndex(clientOffset, gridRef);
+        if (cellIndex >= 0) updateCell(cellIndex, item.name);
       }
     },
     collect: (monitor) => ({
@@ -23,11 +25,22 @@ const Grid = () => {
   }));
 
   // Calculate which cell to drop the item into based on client coordinates
-  const calculateCellIndex = (clientOffset) => {
-    const x = Math.floor(clientOffset.x / 100);
-    const y = Math.floor(clientOffset.y / 100);
+  const calculateCellIndex = (clientOffset, gridRef) => {
+    if (!gridRef.current) return 0;
+  
+    // Get the bounding rectangle of the grid
+    const gridRect = gridRef.current.getBoundingClientRect();
+  
+    // Calculate the position relative to the grid
+    const x = Math.floor((clientOffset.x - gridRect.left) / 100);
+    const y = Math.floor((clientOffset.y - gridRect.top) / 100);
+  
+    // Ensure the calculated position is within grid boundaries
+    if (x < 0 || x >= 5 || y < 0 || y >= 5) return -1;
+  
     return y * 5 + x;
   };
+  
 
   // Update the cell with the dropped component name
   const updateCell = (index, componentName) => {
@@ -52,7 +65,7 @@ const Grid = () => {
   };
 
   return (
-    <div ref={drop} style={gridStyle}>
+    <div ref={drop(gridRef)} style={gridStyle}>
       {cells.map((cell, index) => (
         <div
           key={index}
