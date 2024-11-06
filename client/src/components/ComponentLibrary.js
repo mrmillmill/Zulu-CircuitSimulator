@@ -11,7 +11,7 @@ const ComponentLibrary = () => {
   const DraggableComponent = ({ component }) => {
     const [{ isDragging }, drag] = useDrag(() => ({
       type: component.type,
-      item: { name: component.name },
+      item: { name: component.name, type: component.type },
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
       }),

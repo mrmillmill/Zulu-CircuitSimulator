@@ -16,7 +16,7 @@ const Grid = () => {
       if (clientOffset) {
         // Calculate which cell was dropped on
         const cellIndex = calculateCellIndex(clientOffset, gridRef);
-        if (cellIndex >= 0) updateCell(cellIndex, item.name);
+        if (cellIndex >= 0) updateCell(cellIndex, item.type);
       }
     },
     collect: (monitor) => ({
@@ -42,14 +42,29 @@ const Grid = () => {
   };
   
 
+  //Handle component specific visuals
+  const getComponentData = (type) => {
+    switch (type) {
+      case 'battery':
+        return { name: 'Battery', icon: '🔋' };
+      case 'resistor':
+        return { name: 'Resistor', icon: '🔲' };
+      default:
+        return { name: 'Unknown', icon: '?' };
+    }
+  };
+  
+
   // Update the cell with the dropped component name
-  const updateCell = (index, componentName) => {
+  const updateCell = (index, componentType) => {
+    const componentData = getComponentData(componentType);
     setCells((prevCells) => {
       const newCells = [...prevCells];
-      newCells[index] = componentName;
+      newCells[index] = componentData;
       return newCells;
     });
   };
+  
 
   // Style for the grid
   const gridStyle = {
@@ -76,9 +91,10 @@ const Grid = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            fontSize: '24px', // Adjust font size for icons
           }}
         >
-          {cell}
+          {cell ? cell.icon : ''}
         </div>
       ))}
     </div>
