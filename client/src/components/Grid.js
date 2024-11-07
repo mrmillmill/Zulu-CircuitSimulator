@@ -2,19 +2,16 @@ import React, { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 
 const Grid = () => {
-  // State to track dropped components in each cell
   const [cells, setCells] = useState(Array(25).fill(null));
-
+  const [connections, setConnections] = useState([]); // State to track connections between cells
+  const [selectedCell, setSelectedCell] = useState(null); // State to track the selected cell for connections
   const gridRef = useRef(null);
 
-  // Define the drop behavior
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ['battery', 'resistor'],
     drop: (item, monitor) => {
       const clientOffset = monitor.getClientOffset();
-
       if (clientOffset) {
-        // Calculate which cell was dropped on
         const cellIndex = calculateCellIndex(clientOffset, gridRef);
         if (cellIndex >= 0) updateCell(cellIndex, item.type);
       }
@@ -24,7 +21,7 @@ const Grid = () => {
     }),
   }));
 
-  // Calculate which cell to drop the item into based on client coordinates
+  // Existing functions such as calculateCellIndex, updateCell, handleCellClick, etc.
   const calculateCellIndex = (clientOffset, gridRef) => {
     if (!gridRef.current) return 0;
   
@@ -40,9 +37,7 @@ const Grid = () => {
   
     return y * 5 + x;
   };
-  
 
-  //Handle component specific visuals
   const getComponentData = (type) => {
     switch (type) {
       case 'battery':
@@ -54,8 +49,7 @@ const Grid = () => {
     }
   };
   
-
-  // Update the cell with the dropped component name
+  
   const updateCell = (index, componentType) => {
     const componentData = getComponentData(componentType);
     setCells((prevCells) => {
@@ -66,7 +60,48 @@ const Grid = () => {
   };
   
 
-  // Style for the grid
+  const handleCellClick = (index) => {
+    if (selectedCell === null) {
+      // If no cell is selected, set this as the starting cell
+      setSelectedCell(index);
+    } else {
+      // If a cell is already selected, add the connection
+      setConnections((prevConnections) => [
+        ...prevConnections,
+        [selectedCell, index],
+      ]);
+      setSelectedCell(null); // Reset the selection
+    }
+  };
+
+  const renderConnections = () => {
+    return connections.map(([start, end], index) => {
+      const startX = (start % 5) * 100 + 50;
+      const startY = Math.floor(start / 5) * 100 + 50;
+      const endX = (end % 5) * 100 + 50;
+      const endY = Math.floor(end / 5) * 100 + 50;
+
+      const length = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+      const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+      return (
+        <div
+          key={index}
+          style={{
+            position: 'absolute',
+            top: startY,
+            left: startX,
+            width: length,
+            height: '2px',
+            backgroundColor: 'black',
+            transform: `rotate(${angle}deg)`,
+            transformOrigin: '0 0',
+          }}
+        />
+      );
+    });
+  };
+
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(5, 100px)',
@@ -80,10 +115,12 @@ const Grid = () => {
   };
 
   return (
-    <div ref={drop(gridRef)} style={gridStyle}>
+    <div ref={drop(gridRef)} style={{ position: 'relative', ...gridStyle }}>
+      {renderConnections()}
       {cells.map((cell, index) => (
         <div
           key={index}
+          onClick={() => handleCellClick(index)}
           style={{
             border: '1px dashed gray',
             width: '100px',
@@ -91,7 +128,8 @@ const Grid = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '24px', // Adjust font size for icons
+            fontSize: '24px',
+            backgroundColor: selectedCell === index ? '#d3f9d8' : 'white',
           }}
         >
           {cell ? cell.icon : ''}
